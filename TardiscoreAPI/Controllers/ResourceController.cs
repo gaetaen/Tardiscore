@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Globalization;
+using TardiscoreAPI.Helper;
 using TardiscoreAPI.Interface;
 using TardiscoreAPI.Model.Api;
-using TardiscoreAPI.Properties;
 
 namespace TardiscoreAPI.Controllers
 {
@@ -18,6 +17,7 @@ namespace TardiscoreAPI.Controllers
             _resourcesService = resourcesService;
         }
 
+        [Authorize]
         [HttpPost("key")]
         public IActionResult GetValue(ResourceRequest resourceRequest)
         {
@@ -26,13 +26,17 @@ namespace TardiscoreAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            Resources.Culture = new CultureInfo(resourceRequest.Culture);
-
             var localizedValue = _resourcesService.GetValue(resourceRequest);
 
             if (string.IsNullOrEmpty(localizedValue))
             {
-                return NotFound("Key not found");
+                var errorMessage = new ResourceRequest()
+                {
+                    Culture = resourceRequest.Culture,
+                    Key = Constants.ErrorMessage.KeyNotFound
+                };
+
+                return NotFound(_resourcesService.GetValue(errorMessage));
             }
 
             return Ok(localizedValue);

@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Reflection.Metadata;
+using TardiscoreAPI.Helper;
 using TardiscoreAPI.Interface;
 using TardiscoreAPI.Model;
 
@@ -23,9 +26,9 @@ namespace TardiscoreAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            (bool registrationSuccess, string errorMessages) = await _authService.RegisterUser(user);
+            (bool registrationSuccess, List<string?> errorMessages) = await _authService.RegisterUser(user);
 
-            if (registrationSuccess) return Ok(' ');
+            if (registrationSuccess) return Ok(Constants.SuccessMessage.RegisterSucceeded);
 
             return BadRequest(errorMessages);
         }
@@ -45,7 +48,7 @@ namespace TardiscoreAPI.Controllers
                 return Ok(tokenString);
             }
 
-            return Unauthorized("Invalid credentials");
+            return Unauthorized(Constants.ErrorMessage.InvalidCredentials);
         }
     }
 }

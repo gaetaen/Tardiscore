@@ -117,10 +117,31 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ErrorMessage::EmailExist" xml:space="preserve">
+    <value>Email déjà utilisé</value>
+  </data>
+  <data name="ErrorMessage::InvalidCredentials" xml:space="preserve">
+    <value>Informations d'identification incorrectes</value>
+  </data>
+  <data name="ErrorMessage::KeyNotFound" xml:space="preserve">
+    <value>Clé non trouvée</value>
+  </data>
+  <data name="ErrorMessage::PasswordRequiresDigit" xml:space="preserve">
+    <value>Le mot de passe doit contenir au moins un chiffre</value>
+  </data>
+  <data name="ErrorMessage::PasswordRequiresLower" xml:space="preserve">
+    <value>Le mot de passe doit comporter au moins une minuscule</value>
+  </data>
+  <data name="ErrorMessage::PasswordRequiresUpper" xml:space="preserve">
+    <value>Le mot de passe doit contenir au moins une lettre majuscule</value>
+  </data>
+  <data name="ErrorMessage::PasswordTooShort" xml:space="preserve">
+    <value>Le mot de passe doit comporter au moins 6 caractères</value>
+  </data>
   <data name="ErrorMessage::UserNameExist" xml:space="preserve">
     <value>Nom d'utilisateur déjà existant</value>
   </data>
-  <data name="test" xml:space="preserve">
-    <value>aaaaaaa</value>
+  <data name="SuccessMessage::RegisterSucceeded" xml:space="preserve">
+    <value>Inscription réussie</value>
   </data>
 </root>

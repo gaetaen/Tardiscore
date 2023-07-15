@@ -8,6 +8,6 @@ namespace TardiscoreAPI.Interface
 
         Task<bool> Login(LoginUser user);
 
-        Task<(bool, string)> RegisterUser(LoginUser user);
+        Task<(bool, List<string>)> RegisterUser(LoginUser user);
     }
 }

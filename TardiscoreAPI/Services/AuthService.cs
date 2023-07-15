@@ -7,6 +7,7 @@ using System.Text;
 using TardiscoreAPI.Helper;
 using TardiscoreAPI.Interface;
 using TardiscoreAPI.Model;
+using TardiscoreAPI.Model.Api;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TardiscoreAPI.Services
@@ -22,32 +23,61 @@ namespace TardiscoreAPI.Services
             _config = config;
         }
 
-        public async Task<(bool, string)> RegisterUser(LoginUser user)
+        public async Task<(bool, List<string>?)> RegisterUser(LoginUser user)
         {
-            // Check if the userName already exists
+            var errorMessages = new List<string>();
+
             var usernameExists = await _userManager.FindByNameAsync(user.UserName);
+            var emailExists = await _userManager.FindByEmailAsync(user.Email);
+
             if (usernameExists is not null)
             {
-                // UserName already used, return the error message
-                return (false, "");
+                errorMessages.Add(Constants.ErrorMessage.UserNameExist);
+                return (false, errorMessages);
             }
 
-            // Create a new IdentityUser with the provided email and userName
+            if (emailExists is not null)
+            {
+                errorMessages.Add(Constants.ErrorMessage.EmailExist);
+                return (false, errorMessages);
+            }
+
             var identityUser = new IdentityUser
             {
                 UserName = user.UserName,
                 Email = user.Email
             };
 
-            // Attempt to create the user in the UserManager
             var result = await _userManager.CreateAsync(identityUser, user.Password);
             if (!result.Succeeded)
             {
-                var errors = string.Join(", ", result.Errors) ?? string.Empty;
+                Dictionary<string, string> constantMap = new Dictionary<string, string>
+                {
+                    { "PasswordRequiresDigit", Constants.ErrorMessage.PasswordRequiresDigit },
+                    { "PasswordRequiresUpper", Constants.ErrorMessage.PasswordRequiresUpper },
+                    { "PasswordRequiresLower", Constants.ErrorMessage.PasswordRequiresLower },
+                    { "PasswordTooShort", Constants.ErrorMessage.PasswordTooShort },
+                };
 
-                return (false, errors);
+                if (result.Errors.Any())
+                {
+                    var list = result.Errors.Select(x =>
+                    {
+                        if (constantMap.TryGetValue(x.Code, out string? value))
+                            return value;
+                        else
+                            return x.Code;
+                    }).ToList();
+
+                    errorMessages.AddRange(list);
+
+                    return (false, errorMessages);
+                }
+
+                return (false, null);
             }
-            return (true, string.Empty);
+
+            return (true, null);
         }
 
         public async Task<bool> Login(LoginUser user)

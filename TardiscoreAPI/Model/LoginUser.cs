@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using TardiscoreAPI.Helper;
+using System.Text.RegularExpressions;
 
 namespace TardiscoreAPI.Model
 {

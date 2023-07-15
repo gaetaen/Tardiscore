@@ -61,20 +61,65 @@ namespace TardiscoreAPI.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to aaaaa.
+        ///   Looks up a localized string similar to Email aleready used.
         /// </summary>
-        internal static string aaa {
+        internal static string ErrorMessage__EmailExist {
             get {
-                return ResourceManager.GetString("aaa", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage::EmailExist", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to dddd.
+        ///   Looks up a localized string similar to Invalid credentials.
         /// </summary>
-        internal static string dddddddd {
+        internal static string ErrorMessage__InvalidCredentials {
             get {
-                return ResourceManager.GetString("dddddddd", resourceCulture);
+                return ResourceManager.GetString("ErrorMessage::InvalidCredentials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Key not found.
+        /// </summary>
+        internal static string ErrorMessage__KeyNotFound {
+            get {
+                return ResourceManager.GetString("ErrorMessage::KeyNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The password must contain at least one digit.
+        /// </summary>
+        internal static string ErrorMessage__PasswordRequiresDigit {
+            get {
+                return ResourceManager.GetString("ErrorMessage::PasswordRequiresDigit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The password must contain at least one lower case letter.
+        /// </summary>
+        internal static string ErrorMessage__PasswordRequiresLower {
+            get {
+                return ResourceManager.GetString("ErrorMessage::PasswordRequiresLower", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The password must contain at least one capital letter.
+        /// </summary>
+        internal static string ErrorMessage__PasswordRequiresUpper {
+            get {
+                return ResourceManager.GetString("ErrorMessage::PasswordRequiresUpper", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The password must contain at least 6 characters.
+        /// </summary>
+        internal static string ErrorMessage__PasswordTooShort {
+            get {
+                return ResourceManager.GetString("ErrorMessage::PasswordTooShort", resourceCulture);
             }
         }
         
@@ -88,11 +133,11 @@ namespace TardiscoreAPI.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ddd.
+        ///   Looks up a localized string similar to Successful registration.
         /// </summary>
-        internal static string test {
+        internal static string SuccessMessage__RegisterSucceeded {
             get {
-                return ResourceManager.GetString("test", resourceCulture);
+                return ResourceManager.GetString("SuccessMessage::RegisterSucceeded", resourceCulture);
             }
         }
     }
