@@ -142,6 +142,15 @@ namespace TardiscoreAPI.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to success.
+        /// </summary>
+        internal static string SuccessMessage__Default {
+            get {
+                return ResourceManager.GetString("SuccessMessage::Default", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Successful registration.
         /// </summary>
         internal static string SuccessMessage__RegisterSucceeded {

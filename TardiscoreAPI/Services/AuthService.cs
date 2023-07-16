@@ -6,7 +6,6 @@ using System.Security.Claims;
 using System.Text;
 using TardiscoreAPI.Helper;
 using TardiscoreAPI.Interface;
-using TardiscoreAPI.Model;
 using TardiscoreAPI.Model.Api;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -23,7 +22,7 @@ namespace TardiscoreAPI.Services
             _config = config;
         }
 
-        public async Task<(bool, List<string>)> RegisterUser(LoginUser user)
+        public async Task<(bool, List<string>)> RegisterUser(LoginUserRequest user)
         {
             var errorMessages = new List<string>();
 
@@ -45,13 +44,15 @@ namespace TardiscoreAPI.Services
             var identityUser = new IdentityUser
             {
                 UserName = user.UserName,
-                Email = user.Email
+                Email = user.Email,
             };
 
             var result = await _userManager.CreateAsync(identityUser, user.Password);
-            if (!result.Succeeded)
+            var newUser = await _userManager.FindByEmailAsync(user.Email);
+
+            if (!result.Succeeded || newUser is null)
             {
-                Dictionary<string, string> constantMap = new Dictionary<string, string>
+                Dictionary<string, string> constantMap = new()
                 {
                     { "PasswordRequiresDigit", Constants.ErrorMessage.PasswordRequiresDigit },
                     { "PasswordRequiresUpper", Constants.ErrorMessage.PasswordRequiresUpper },
@@ -60,28 +61,35 @@ namespace TardiscoreAPI.Services
                     { "InvalidEmail", Constants.ErrorMessage.InvalidEmail },
                 };
 
-                if (result.Errors.Any())
+                if (!result.Errors.Any()) return (false, errorMessages);
+
+                var list = result.Errors.Select(x =>
                 {
-                    var list = result.Errors.Select(x =>
-                    {
-                        if (constantMap.TryGetValue(x.Code, out string? value))
-                            return value;
-                        else
-                            return x.Code;
-                    }).ToList();
+                    if (constantMap.TryGetValue(x.Code, out string? value))
+                        return value;
+                    else
+                        return x.Code;
+                }).ToList();
 
-                    errorMessages.AddRange(list);
-
-                    return (false, errorMessages);
-                }
+                errorMessages.AddRange(list);
 
                 return (false, errorMessages);
             }
 
+            await _userManager.AddToRoleAsync(newUser, "User");
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Role, "User"),
+            };
+
+            await _userManager.AddClaimsAsync(identityUser, claims);
             return (true, errorMessages);
         }
 
-        public async Task<bool> Login(LoginUser user)
+        public async Task<bool> Login(LoginUserRequest user)
         {
             var identityUser = await _userManager.FindByEmailAsync(user.Email);
             if (identityUser is null)
@@ -92,17 +100,19 @@ namespace TardiscoreAPI.Services
             return await _userManager.CheckPasswordAsync(identityUser, user.Password);
         }
 
-        public string GenerateTokenString(LoginUser user)
+        public async Task<string> GenerateTokenString(LoginUserRequest user)
         {
-            var claims = new List<Claim>
+            var identityUser = await _userManager.FindByEmailAsync(user.Email);
+            if (identityUser is null)
             {
-                new Claim(ClaimTypes.Email,user.Email),
-            };
+                return string.Empty;
+            }
 
-            var key = _config["Jwt:Key"];
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key ?? throw new InvalidOperationException("JWT key is not configured")));
+            var claims = await _userManager.GetClaimsAsync(identityUser);
 
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
+
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha384Signature);
             var expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_config["Jwt:ExpiresInMinutes"]));
 
             var token = new JwtSecurityToken(

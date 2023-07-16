@@ -17,7 +17,7 @@
 
         public static class SuccessMessage
         {
-            public const string RegisterSucceeded = "SuccessMessage::Succeeded ";
+            public const string RegisterSucceeded = "SuccessMessage::RegisterSucceeded";
         }
     }
 }

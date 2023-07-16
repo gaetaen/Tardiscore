@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using System.Reflection.Metadata;
 using TardiscoreAPI.Helper;
 using TardiscoreAPI.Interface;
-using TardiscoreAPI.Model;
+using TardiscoreAPI.Model.Api;
 
 namespace TardiscoreAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -18,8 +19,14 @@ namespace TardiscoreAPI.Controllers
             _authService = authService;
         }
 
+        /// <summary>
+        /// Register a user
+        /// </summary>
+        /// <param name="user"></param>
+        /// <response code="200">SuccessMessage::RegisterSucceeded</response>
+        /// <response code="400">ErrorMessage::"error target"</response>
         [HttpPost("Register")]
-        public async Task<IActionResult> RegisterUser(LoginUser user)
+        public async Task<ActionResult<string>> RegisterUser([FromBody] LoginUserRequest user)
         {
             if (!ModelState.IsValid)
             {
@@ -33,8 +40,14 @@ namespace TardiscoreAPI.Controllers
             return BadRequest(errorMessages);
         }
 
+        /// <summary>
+        /// Login a user
+        /// </summary>
+        /// <param name="user"></param>
+        /// <response code="200">JWT token</response>
+        /// <response code="400">ErrorMessage::"error target"</response>
         [HttpPost("Login")]
-        public async Task<IActionResult> Login(LoginUser user)
+        public async Task<ActionResult<Jwt>> Login([FromBody] LoginUserRequest user)
         {
             if (!ModelState.IsValid)
             {
@@ -44,8 +57,12 @@ namespace TardiscoreAPI.Controllers
             bool loginSuccess = await _authService.Login(user);
             if (loginSuccess)
             {
-                var tokenString = _authService.GenerateTokenString(user);
-                return Ok(tokenString);
+                var token = new Jwt()
+                {
+                    Token = await _authService.GenerateTokenString(user)
+                };
+
+                return Ok(token);
             }
 
             return Unauthorized(Constants.ErrorMessage.InvalidCredentials);

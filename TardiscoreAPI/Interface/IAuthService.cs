@@ -1,13 +1,13 @@
-﻿using TardiscoreAPI.Model;
+﻿using TardiscoreAPI.Model.Api;
 
 namespace TardiscoreAPI.Interface
 {
     public interface IAuthService
     {
-        string GenerateTokenString(LoginUser user);
+        Task<string> GenerateTokenString(LoginUserRequest user);
 
-        Task<bool> Login(LoginUser user);
+        Task<bool> Login(LoginUserRequest user);
 
-        Task<(bool, List<string>)> RegisterUser(LoginUser user);
+        Task<(bool, List<string>)> RegisterUser(LoginUserRequest user);
     }
 }

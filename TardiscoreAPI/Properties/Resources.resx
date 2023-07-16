@@ -144,6 +144,9 @@
   <data name="ErrorMessage::UserNameExist" xml:space="preserve">
     <value>Already existing username</value>
   </data>
+  <data name="SuccessMessage::Default" xml:space="preserve">
+    <value>success</value>
+  </data>
   <data name="SuccessMessage::RegisterSucceeded" xml:space="preserve">
     <value>Successful registration</value>
   </data>

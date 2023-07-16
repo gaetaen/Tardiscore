@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Globalization;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using TardiscoreAPI.Data;
 using TardiscoreAPI.Interface;
@@ -19,19 +21,11 @@ var configuration = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .Build();
 
-var jwtIssuer = configuration.GetSection("Jwt:Issuer").Value;
-var jwtAudience = configuration.GetSection("Jwt:Audience").Value;
-var jwtKey = configuration.GetSection("Jwt:Key").Value;
 var supportedCultures = new[]
 {
     new CultureInfo("fr-FR"),
     new CultureInfo("en-US")
 };
-
-if (string.IsNullOrEmpty(jwtIssuer) || string.IsNullOrEmpty(jwtAudience) || string.IsNullOrEmpty(jwtKey))
-{
-    throw new InvalidOperationException("JWT configuration values are missing");
-}
 
 builder.Services.AddDbContext<DataContext>(options =>
 {
@@ -50,26 +44,27 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
     .AddEntityFrameworkStores<DataContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddAuthentication(options =>
+builder.Services.AddAuthentication(Options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-    .AddJwtBearer(options =>
+    Options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    Options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    Options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters()
         {
-            ValidateActor = true,
+            ValidIssuer = configuration["Jwt:Issuer"]!,
+            ValidAudience = configuration["Jwt:Audience"]!,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)),
             ValidateIssuer = true,
             ValidateAudience = true,
-            RequireExpirationTime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtIssuer,
-            ValidAudience = jwtAudience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            RequireExpirationTime = true,
             ClockSkew = TimeSpan.FromSeconds(5)
         };
     });
+
+builder.Services.AddAuthorization();
 
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
@@ -85,13 +80,40 @@ builder.Services.AddScoped<IResourcesService, ResourcesService>();
 
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Tardiscore", Version = "v1" });
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the bearer scheme",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT"
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 
 var app = builder.Build();
 
 app.UseRequestLocalization();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

@@ -6,8 +6,9 @@ using TardiscoreAPI.Model.Api;
 
 namespace TardiscoreAPI.Controllers
 {
-    [Route("api/a[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class ResourceController : ControllerBase
     {
         private readonly IResourcesService _resourcesService;
@@ -17,6 +18,12 @@ namespace TardiscoreAPI.Controllers
             _resourcesService = resourcesService;
         }
 
+        /// <summary>
+        /// Get the value of a translation key
+        /// </summary>
+        /// <param name="resourceRequest"></param>
+        /// <response code="200">The value of the key</response>
+        /// <response code="400">ErrorMessage::"error target"</response>
         [Authorize]
         [HttpPost("key")]
         public IActionResult GetValue(ResourceRequest resourceRequest)
