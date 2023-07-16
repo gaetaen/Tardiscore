@@ -123,6 +123,9 @@
   <data name="ErrorMessage::InvalidCredentials" xml:space="preserve">
     <value>Invalid credentials</value>
   </data>
+  <data name="ErrorMessage::InvalidEmail" xml:space="preserve">
+    <value>Invalid Email</value>
+  </data>
   <data name="ErrorMessage::KeyNotFound" xml:space="preserve">
     <value>Key not found</value>
   </data>

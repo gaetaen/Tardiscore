@@ -23,7 +23,7 @@ namespace TardiscoreAPI.Services
             _config = config;
         }
 
-        public async Task<(bool, List<string>?)> RegisterUser(LoginUser user)
+        public async Task<(bool, List<string>)> RegisterUser(LoginUser user)
         {
             var errorMessages = new List<string>();
 
@@ -57,6 +57,7 @@ namespace TardiscoreAPI.Services
                     { "PasswordRequiresUpper", Constants.ErrorMessage.PasswordRequiresUpper },
                     { "PasswordRequiresLower", Constants.ErrorMessage.PasswordRequiresLower },
                     { "PasswordTooShort", Constants.ErrorMessage.PasswordTooShort },
+                    { "InvalidEmail", Constants.ErrorMessage.InvalidEmail },
                 };
 
                 if (result.Errors.Any())
@@ -74,10 +75,10 @@ namespace TardiscoreAPI.Services
                     return (false, errorMessages);
                 }
 
-                return (false, null);
+                return (false, errorMessages);
             }
 
-            return (true, null);
+            return (true, errorMessages);
         }
 
         public async Task<bool> Login(LoginUser user)

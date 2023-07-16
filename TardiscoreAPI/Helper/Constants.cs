@@ -12,6 +12,7 @@
             public const string PasswordRequiresUpper = "ErrorMessage::PasswordRequiresUpper";
             public const string PasswordRequiresLower = "ErrorMessage::PasswordRequiresLower";
             public const string PasswordTooShort = "ErrorMessage::PasswordTooShort";
+            public const string InvalidEmail = "ErrorMessage::InvalidEmail";
         }
 
         public static class SuccessMessage

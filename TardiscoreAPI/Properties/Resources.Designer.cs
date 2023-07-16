@@ -79,6 +79,15 @@ namespace TardiscoreAPI.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid Email.
+        /// </summary>
+        internal static string ErrorMessage__InvalidEmail {
+            get {
+                return ResourceManager.GetString("ErrorMessage::InvalidEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Key not found.
         /// </summary>
         internal static string ErrorMessage__KeyNotFound {

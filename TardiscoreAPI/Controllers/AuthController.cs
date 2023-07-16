@@ -26,7 +26,7 @@ namespace TardiscoreAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            (bool registrationSuccess, List<string?> errorMessages) = await _authService.RegisterUser(user);
+            (bool registrationSuccess, List<string> errorMessages) = await _authService.RegisterUser(user);
 
             if (registrationSuccess) return Ok(Constants.SuccessMessage.RegisterSucceeded);
 
