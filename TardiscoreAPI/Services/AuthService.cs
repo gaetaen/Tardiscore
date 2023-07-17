@@ -1,22 +1,23 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Azure;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using TardiscoreAPI.Helper;
 using TardiscoreAPI.Interface;
 using TardiscoreAPI.Model.Api;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using TardiscoreAPI.Model.Identity;
 
 namespace TardiscoreAPI.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _config;
 
-        public AuthService(UserManager<IdentityUser> userManager, IConfiguration config)
+        public AuthService(UserManager<ApplicationUser> userManager, IConfiguration config)
         {
             _userManager = userManager;
             _config = config;
@@ -41,7 +42,7 @@ namespace TardiscoreAPI.Services
                 return (false, errorMessages);
             }
 
-            var identityUser = new IdentityUser
+            var identityUser = new ApplicationUser
             {
                 UserName = user.UserName,
                 Email = user.Email,
@@ -124,6 +125,29 @@ namespace TardiscoreAPI.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public RefreshToken GenerateRefreshToken()
+        {
+            return new RefreshToken
+            {
+                Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+                Created = DateTime.Now,
+                Expires = DateTime.Now.AddDays(7)
+            };
+        }
+
+        public async Task SetRefreshToken(RefreshToken newRefreshToken, string userMail)
+        {
+            var user = await _userManager.FindByEmailAsync(userMail);
+
+            if (user == null) { return; }
+
+            user.RefreshToken = newRefreshToken.Token;
+            user.RefreshTokenCreation = newRefreshToken.Created;
+            user.RefreshTokenExpiration = newRefreshToken.Expires;
+
+            await _userManager.UpdateAsync(user);
         }
     }
 }

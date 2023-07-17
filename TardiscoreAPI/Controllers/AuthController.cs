@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection.Metadata;
+using System.Security.Cryptography;
 using TardiscoreAPI.Helper;
 using TardiscoreAPI.Interface;
 using TardiscoreAPI.Model.Api;
@@ -62,10 +64,41 @@ namespace TardiscoreAPI.Controllers
                     Token = await _authService.GenerateTokenString(user)
                 };
 
+                var newRefreshToken = _authService.GenerateRefreshToken();
+
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Expires = newRefreshToken.Expires
+                };
+                Response.Cookies.Append("refreshToken", newRefreshToken.Token, cookieOptions);
+
+                await _authService.SetRefreshToken(newRefreshToken, user.Email);
                 return Ok(token);
             }
 
             return Unauthorized(Constants.ErrorMessage.InvalidCredentials);
         }
+
+        //[HttpPost("refresh-token")]
+        //public async Task<ActionResult<string>> RefreshToken()
+        //{
+        //    var refreshToken = Request.Cookies["refreshToken"];
+
+        //    if (!user.RefreshToken.Equals(refreshToken))
+        //    {
+        //        return Unauthorized("Invalid Refresh Token.");
+        //    }
+        //    else if (user.TokenExpires < DateTime.Now)
+        //    {
+        //        return Unauthorized("Token expired.");
+        //    }
+
+        //    string token = CreateToken(user);
+        //    var newRefreshToken = GenerateRefreshToken();
+        //    SetRefreshToken(newRefreshToken);
+
+        //    return Ok(token);
+        //}
     }
 }

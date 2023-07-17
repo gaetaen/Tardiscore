@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Text;
 using TardiscoreAPI.Data;
 using TardiscoreAPI.Interface;
+using TardiscoreAPI.Model.Identity;
 using TardiscoreAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,7 +33,7 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(configuration.GetSection("ConnectionStrings:DefaultConnection").Value);
 });
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
     options.User.RequireUniqueEmail = true;
     options.Password.RequireDigit = true;
