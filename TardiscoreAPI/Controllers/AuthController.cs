@@ -46,7 +46,7 @@ namespace TardiscoreAPI.Controllers
         /// Login a user
         /// </summary>
         /// <param name="user"></param>
-        /// <response code="200">JWT token</response>
+        /// <response code="200">Access token</response>
         /// <response code="400">ErrorMessage::"error target"</response>
         [HttpPost("Login")]
         public async Task<ActionResult<Jwt>> Login([FromBody] LoginUserRequest user)
@@ -59,10 +59,7 @@ namespace TardiscoreAPI.Controllers
             bool loginSuccess = await _authService.Login(user);
             if (loginSuccess)
             {
-                var token = new Jwt()
-                {
-                    Token = await _authService.GenerateTokenString(user)
-                };
+                var token = await _authService.GenerateAccessToken(user.Email);
 
                 var newRefreshToken = _authService.GenerateRefreshToken();
 
@@ -71,34 +68,40 @@ namespace TardiscoreAPI.Controllers
                     HttpOnly = true,
                     Expires = newRefreshToken.Expires
                 };
+
                 Response.Cookies.Append("refreshToken", newRefreshToken.Token, cookieOptions);
 
                 await _authService.SetRefreshToken(newRefreshToken, user.Email);
+
                 return Ok(token);
             }
 
             return Unauthorized(Constants.ErrorMessage.InvalidCredentials);
         }
 
-        //[HttpPost("refresh-token")]
-        //public async Task<ActionResult<string>> RefreshToken()
-        //{
-        //    var refreshToken = Request.Cookies["refreshToken"];
+        /// <summary>
+        /// Get the AccessToken
+        /// </summary>
+        /// <param>from the cookies</param>
+        /// <response code="200">Access token</response>
+        /// <response code="400">ErrorMessage::"error target"</response>
+        [HttpGet("get-access-token")]
+        public async Task<ActionResult<string>> GetAccessToken()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
 
-        //    if (!user.RefreshToken.Equals(refreshToken))
-        //    {
-        //        return Unauthorized("Invalid Refresh Token.");
-        //    }
-        //    else if (user.TokenExpires < DateTime.Now)
-        //    {
-        //        return Unauthorized("Token expired.");
-        //    }
+            if (refreshToken is null)
+            {
+                return NotFound("No Refresh Token.");
+            }
 
-        //    string token = CreateToken(user);
-        //    var newRefreshToken = GenerateRefreshToken();
-        //    SetRefreshToken(newRefreshToken);
+            (bool valid, string userEmail) = await _authService.CheckRefreshToken(refreshToken);
 
-        //    return Ok(token);
-        //}
+            if (!valid) return Unauthorized("Token not valid");
+
+            string token = await _authService.GenerateAccessToken(userEmail);
+
+            return Ok(token);
+        }
     }
 }

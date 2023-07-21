@@ -41,9 +41,12 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     options.Password.RequireUppercase = true;
     options.Password.RequiredLength = 6;
     options.Password.RequireNonAlphanumeric = false;
-})
+}).AddUserManager<ApplicationManager>()
     .AddEntityFrameworkStores<DataContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddTransient<IAuthService, AuthService>();
+builder.Services.AddScoped<IResourcesService, ResourcesService>();
 
 builder.Services.AddAuthentication(Options =>
 {
@@ -74,10 +77,6 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 });
 
 builder.Services.AddControllers();
-
-builder.Services.AddTransient<IAuthService, AuthService>();
-
-builder.Services.AddScoped<IResourcesService, ResourcesService>();
 
 builder.Services.AddEndpointsApiExplorer();
 

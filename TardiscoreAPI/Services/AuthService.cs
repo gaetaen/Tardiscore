@@ -14,10 +14,10 @@ namespace TardiscoreAPI.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ApplicationManager _userManager;
         private readonly IConfiguration _config;
 
-        public AuthService(UserManager<ApplicationUser> userManager, IConfiguration config)
+        public AuthService(ApplicationManager userManager, IConfiguration config)
         {
             _userManager = userManager;
             _config = config;
@@ -101,9 +101,9 @@ namespace TardiscoreAPI.Services
             return await _userManager.CheckPasswordAsync(identityUser, user.Password);
         }
 
-        public async Task<string> GenerateTokenString(LoginUserRequest user)
+        public async Task<string> GenerateAccessToken(string userEmail)
         {
-            var identityUser = await _userManager.FindByEmailAsync(user.Email);
+            var identityUser = await _userManager.FindByEmailAsync(userEmail);
             if (identityUser is null)
             {
                 return string.Empty;
@@ -148,6 +148,18 @@ namespace TardiscoreAPI.Services
             user.RefreshTokenExpiration = newRefreshToken.Expires;
 
             await _userManager.UpdateAsync(user);
+        }
+
+        public async Task<(bool, string)> CheckRefreshToken(string refreshToken)
+        {
+            var user = await _userManager.FindByRefreshTokenAsync(refreshToken);
+
+            if (user is null || user.Email is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiration < DateTime.Now)
+            {
+                return (false, string.Empty);
+            }
+
+            return (true, user.Email);
         }
     }
 }

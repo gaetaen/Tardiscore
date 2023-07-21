@@ -10,8 +10,10 @@ namespace TardiscoreAPI.Interface
 
         RefreshToken GenerateRefreshToken();
 
-        Task<string> GenerateTokenString(LoginUserRequest user);
+        Task<string> GenerateAccessToken(string userEmail);
 
         Task SetRefreshToken(RefreshToken newRefreshToken, string userMail);
+
+        Task<(bool, string)> CheckRefreshToken(string refreshToken);
     }
 }
